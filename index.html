@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Veleslav — A Dark Romance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --deep:     #080b0f;
+      --parchment:#f0ebe0;
+      --gold:     #c9a96e;
+      --gold-dim: #7a6240;
+      --mist:     #8fa0ab;
+      --crimson:  #6b1e1e;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; }
+
+    body {
+      background: var(--deep);
+      color: var(--parchment);
+      font-family: 'Cormorant Garamond', serif;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── Grain texture ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    /* ── Rain ── */
+    #rain {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.15;
+    }
+
+    /* ── Background atmosphere ── */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(201,169,110,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 85% 80%, rgba(107,30,30,0.08) 0%, transparent 60%);
+    }
+
+    /* ══════════════════════
+       HERO
+    ══════════════════════ */
+    .hero {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 0 6vw;
+    }
+
+    .hero-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -52%);
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(18rem, 40vw, 42rem);
+      font-weight: 700;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(201,169,110,0.055);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-top: 2.5rem;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 0.2s;
+    }
+
+    .hero-tag {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+
+    .hero-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 0 3rem;
+    }
+
+    .title-pre {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+      letter-spacing: 0.7em;
+      text-transform: uppercase;
+      color: var(--mist);
+      display: block;
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: fadeIn 1.2s ease forwards 0.4s;
+    }
+
+    .title-main {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(4rem, 13vw, 11rem);
+      font-weight: 700;
+      line-height: 0.9;
+      color: var(--parchment);
+      letter-spacing: -0.02em;
+      opacity: 0;
+      animation: titleReveal 1.8s cubic-bezier(0.16,1,0.3,1) forwards 0.6s;
+    }
+
+    .title-main::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 1.5rem auto 0;
+      animation: lineGrow 1.2s ease forwards 1.8s;
+    }
+
+    .title-sub {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: clamp(0.95rem, 2vw, 1.2rem);
+      color: var(--mist);
+      margin-top: 2rem;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 1.6s;
+    }
+
+    /* ── Chapter cards ── */
+    .chapters {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 4rem;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 2s;
+      width: 100%;
+    }
+
+    .chapter-link {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 1.4rem 2.5rem;
+      width: clamp(280px, 55vw, 520px);
+      border: 1px solid rgba(201,169,110,0.12);
+      text-decoration: none;
+      color: var(--parchment);
+      position: relative;
+      transition: all 0.4s ease;
+      background: rgba(8,11,15,0.5);
+      backdrop-filter: blur(4px);
+    }
+
+    .chapter-link:first-child { border-bottom: none; }
+
+    .chapter-link::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(201,169,110,0.05), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .chapter-link:hover::before { opacity: 1; }
+    .chapter-link:hover { border-color: rgba(201,169,110,0.35); }
+    .chapter-link:hover .ch-arrow { transform: translateX(6px); color: var(--gold); }
+    .chapter-link:hover .ch-num   { color: var(--gold); }
+
+    .ch-num {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      min-width: 70px;
+      transition: color 0.4s;
+    }
+
+    .ch-info { flex: 1; }
+
+    .ch-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.3rem;
+    }
+
+    .ch-desc {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: clamp(0.78rem, 1.3vw, 0.88rem);
+      color: var(--mist);
+      opacity: 0.8;
+    }
+
+    .ch-arrow {
+      font-size: 0.9rem;
+      color: var(--gold-dim);
+      transition: transform 0.4s ease, color 0.4s;
+    }
+
+    .hero-bottom {
+      display: flex;
+      justify-content: center;
+      padding-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards 2.4s;
+    }
+
+    .scroll-hint {
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: rgba(139,111,71,0.4);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .scroll-hint::before, .scroll-hint::after {
+      content: '';
+      width: 50px;
+      height: 1px;
+      background: rgba(201,169,110,0.15);
+      display: block;
+    }
+
+    /* ══════════════════════
+       ABOUT
+    ══════════════════════ */
+    .about {
+      position: relative;
+      z-index: 2;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 7rem 2.5rem 8rem;
+      text-align: center;
+    }
+
+    .about-rule {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+    .about-rule::before, .about-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,169,110,0.25), transparent);
+    }
+    .about-rule span {
+      font-family: 'Cinzel', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      white-space: nowrap;
+    }
+
+    .about-quote {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: clamp(1.15rem, 2.5vw, 1.55rem);
+      line-height: 1.85;
+      color: rgba(240,235,224,0.72);
+      margin-bottom: 2rem;
+    }
+
+    .about-attr {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid rgba(201,169,110,0.08);
+      font-family: 'Cinzel', serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: rgba(139,111,71,0.35);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes titleReveal {
+      from { opacity: 0; transform: translateY(30px) scale(0.97); filter: blur(6px); }
+      to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    @keyframes lineGrow {
+      from { width: 0; }
+      to   { width: clamp(120px, 30%, 280px); }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="rain"></canvas>
+<div class="bg-glow"></div>
+
+<section class="hero">
+  <div class="hero-watermark">V</div>
+
+  <div class="hero-top">
+    <span class="hero-tag">A Dark Romance Novel</span>
+    <span class="hero-tag">2026</span>
+  </div>
+
+  <div class="hero-center">
+    <span class="title-pre">Welcome to</span>
+    <h1 class="title-main">Veleslav</h1>
+    <p class="title-sub">Where the rain tastes like ash, and strangers know too much.</p>
+
+    <nav class="chapters">
+      <a class="chapter-link" href="chapter1.html">
+        <span class="ch-num">Chapter I</span>
+        <div class="ch-info">
+          <div class="ch-title">Café Arabela</div>
+          <div class="ch-desc">She had the feeling she'd just stepped into a game.</div>
+        </div>
+        <span class="ch-arrow">→</span>
+      </a>
+      <a class="chapter-link" href="chapter2.html">
+        <span class="ch-num">Chapter II</span>
+        <div class="ch-info">
+          <div class="ch-title">The Collector's Echo</div>
+          <div class="ch-desc">One word, scrawled in elegant calligraphy: Taken.</div>
+        </div>
+        <span class="ch-arrow">→</span>
+      </a>
+    </nav>
+  </div>
+
+  <div class="hero-bottom">
+    <div class="scroll-hint">Scroll</div>
+  </div>
+</section>
+
+<section class="about">
+  <div class="about-rule reveal"><span>The Story</span></div>
+  <p class="about-quote reveal">
+    "In the ancient city of Veleslav, beneath skies heavy with rain and secrets, a folklore scholar crosses paths with a man who sees too much — and hides even more."
+  </p>
+  <p class="about-attr reveal">Lily &amp; Zane</p>
+</section>
+
+<footer>&copy; 2026 &nbsp;·&nbsp; All Rights Reserved &nbsp;·&nbsp; Veleslav</footer>
+
+<script>
+  const canvas = document.getElementById('rain');
+  const ctx = canvas.getContext('2d');
+  let drops = [];
+
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < 140; i++) {
+    drops.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      len: Math.random() * 18 + 8,
+      speed: Math.random() * 2.5 + 1,
+      opacity: Math.random() * 0.4 + 0.08,
+      width: Math.random() * 0.6 + 0.2,
+    });
+  }
+
+  (function drawRain() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drops.forEach(d => {
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y);
+      ctx.lineTo(d.x - d.len * 0.15, d.y + d.len);
+      ctx.strokeStyle = `rgba(170,195,210,${d.opacity})`;
+      ctx.lineWidth = d.width;
+      ctx.stroke();
+      d.y += d.speed; d.x -= d.speed * 0.15;
+      if (d.y > canvas.height) { d.y = -d.len; d.x = Math.random() * canvas.width; }
+    });
+    requestAnimationFrame(drawRain);
+  })();
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
