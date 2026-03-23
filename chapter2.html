@@ -37,6 +37,22 @@
       opacity: 0.22;
     }
 
+    /* ── Fixed Top Nav ── */
+    nav.topnav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 20;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2.5rem;
+      background: rgba(13,17,23,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(201,169,110,0.1);
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
+    }
+    nav.topnav a { color: #8b6f47; text-decoration: none; transition: color 0.3s; }
+    nav.topnav a:hover { color: #c9a96e; }
+    nav.topnav .nav-center { color: #9aa8b2; font-size: 0.55rem; letter-spacing: 0.3em; }
+
     /* ── Fog ── */
     .fog {
       position: fixed;
@@ -342,15 +358,14 @@
 <canvas id="rain"></canvas>
 <div class="fog"></div>
 
-<!-- Nav -->
-<nav>
+<nav class="topnav">
   <a href="chapter1.html">← Chapter I</a>
-  <span class="nav-title">Veleslav</span>
-  <span style="opacity:0; pointer-events:none;">—</span>
+  <span class="nav-center">Veleslav</span>
+  <a href="chapter3.html">Chapter III →</a>
 </nav>
 
 <!-- Hero -->
-<section class="hero">
+<section class="hero" style="padding-top:6rem;">
   <p class="hero-eyebrow">A Dark Romance Novel</p>
   <h1 class="hero-title">The Collector's Echo</h1>
   <span class="hero-chapter-num">Chapter Two</span>
@@ -518,7 +533,7 @@
 <!-- Chapter nav -->
 <div class="chapter-nav">
   <a href="chapter1.html">← Chapter I</a>
-  <span style="font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.3em; color: rgba(139,111,71,0.4); text-transform:uppercase;">End of Chapter II</span>
+  <a href="chapter3.html">Chapter III →</a>
 </div>
 
 <footer>&copy; 2026 &nbsp;·&nbsp; All Rights Reserved</footer>
