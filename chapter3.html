@@ -27,6 +27,23 @@
       overflow-x: hidden;
     }
 
+    /* ── Fixed Top Nav ── */
+    nav.topnav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 20;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2.5rem;
+      background: rgba(13,17,23,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(201,169,110,0.1);
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
+    }
+    nav.topnav a { color: #8b6f47; text-decoration: none; transition: color 0.3s; }
+    nav.topnav a:hover { color: #c9a96e; }
+    nav.topnav .nav-center { color: #9aa8b2; font-size: 0.55rem; letter-spacing: 0.3em; }
+    nav.topnav .nav-ghost { opacity: 0; pointer-events: none; }
+
     #rain {
       position: fixed; inset: 0;
       pointer-events: none; z-index: 0; opacity: 0.10;
@@ -254,14 +271,14 @@
 <canvas id="rain"></canvas>
 <div class="fog"></div>
 
-<nav>
+<nav class="topnav">
   <a href="chapter2.html">← Chapter II</a>
-  <span class="nav-title">Veleslav</span>
+  <span class="nav-center">Veleslav</span>
   <a href="index.html">Home</a>
 </nav>
 
 <!-- Hero -->
-<section class="hero">
+<section class="hero" style="padding-top:6rem;">
   <p class="hero-eyebrow">A Dark Romance Novel</p>
   <h1 class="hero-title">The Collector's Invitation</h1>
   <span class="hero-chapter-num">Chapter Three</span>
