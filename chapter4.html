@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chapter Four — The Line</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --parchment: #f5f0e8;
+      --sepia: #8b6f47;
+      --mist: #9aa8b2;
+      --accent: #c9a96e;
+      --deep: #0d1117;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--deep);
+      color: var(--parchment);
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    #rain { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.14; }
+    .fog {
+      position: fixed; inset: 0; pointer-events: none; z-index: 1;
+      background:
+        radial-gradient(ellipse at 60% 10%, rgba(201,169,110,0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 90%, rgba(100,120,130,0.05) 0%, transparent 60%);
+    }
+    nav.topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2.5rem;
+      background: rgba(13,17,23,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(201,169,110,0.1);
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
+    }
+    nav.topnav a { color: #8b6f47; text-decoration: none; transition: color 0.3s; }
+    nav.topnav a:hover { color: #c9a96e; }
+    nav.topnav .nav-center { color: #9aa8b2; font-size: 0.55rem; letter-spacing: 0.3em; }
+    .hero {
+      position: relative; z-index: 2;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 2rem 4rem;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(201,169,110,0.03) 39px, rgba(201,169,110,0.03) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(201,169,110,0.02) 39px, rgba(201,169,110,0.02) 40px);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 35%, rgba(10,8,5,0.6) 100%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.5em;
+      color: var(--mist); text-transform: uppercase; margin-bottom: 2rem;
+      opacity: 0; animation: fadeUp 1.2s ease forwards 0.3s; position: relative; z-index: 1;
+    }
+    .hero-title {
+      font-family: 'Cinzel', serif; font-size: clamp(2.5rem, 8vw, 6.5rem);
+      font-weight: 600; line-height: 0.95; color: var(--parchment);
+      margin-bottom: 0.5rem; opacity: 0; animation: fadeUp 1.4s ease forwards 0.5s;
+      position: relative; z-index: 1;
+    }
+    .hero-chapter-num {
+      font-family: 'Cinzel', serif; font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+      color: var(--accent); letter-spacing: 0.45em; text-transform: uppercase;
+      display: block; margin-bottom: 2rem;
+      opacity: 0; animation: fadeUp 1.4s ease forwards 0.65s; position: relative; z-index: 1;
+    }
+    .hero-subtitle {
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: clamp(1rem, 2.2vw, 1.28rem); color: var(--mist);
+      max-width: 42ch; line-height: 1.75; margin-bottom: 3rem;
+      opacity: 0; animation: fadeUp 1.4s ease forwards 0.85s; position: relative; z-index: 1;
+    }
+    .scroll-cue {
+      font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.4em;
+      color: var(--sepia); text-transform: uppercase;
+      opacity: 0; animation: fadeUp 1s ease forwards 1.4s, pulse 2.5s ease-in-out infinite 2.4s;
+      display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1;
+    }
+    .scroll-cue::before, .scroll-cue::after { content: ''; display: block; width: 40px; height: 1px; background: var(--sepia); }
+    .chapter { position: relative; z-index: 2; max-width: 680px; margin: 0 auto; padding: 0 2rem 8rem; }
+    .chapter-header { text-align: center; padding: 5rem 0 3rem; border-top: 1px solid rgba(201,169,110,0.2); }
+    .chapter-label { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.5em; color: var(--sepia); text-transform: uppercase; display: block; margin-bottom: 1rem; }
+    .chapter-name { font-family: 'Cinzel', serif; font-size: clamp(1.4rem, 3.5vw, 2.1rem); font-weight: 400; color: var(--accent); letter-spacing: 0.05em; }
+    .ornament { text-align: center; color: var(--accent); font-size: 1.1rem; opacity: 0.55; margin: 2.5rem 0; letter-spacing: 0.5em; }
+    .prose p { font-size: clamp(1.05rem, 2vw, 1.2rem); line-height: 1.95; color: rgba(245,240,232,0.88); margin-bottom: 1.6em; text-align: justify; hyphens: auto; }
+    .prose p:first-child::first-letter {
+      font-family: 'Cinzel', serif; font-size: 4.5rem; font-weight: 600;
+      color: var(--accent); float: left; line-height: 0.8;
+      margin: 0.05em 0.12em 0 0; padding: 0.05em 0.08em;
+      border: 1px solid rgba(201,169,110,0.4);
+    }
+    .prose em { font-family: 'IM Fell English', serif; color: var(--parchment); }
+    .dialogue { color: rgba(245,240,232,0.97); font-style: italic; }
+    .lone-line { text-align: center; font-family: 'Cinzel', serif; font-size: clamp(1rem, 2.5vw, 1.3rem); font-weight: 600; letter-spacing: 0.2em; color: var(--accent); margin: 2.5rem 0 !important; }
+    .chapter-nav {
+      position: relative; z-index: 2;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 680px; margin: 0 auto; padding: 2rem 2rem 5rem;
+      border-top: 1px solid rgba(201,169,110,0.15);
+    }
+    .chapter-nav a { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--sepia); text-decoration: none; transition: color 0.3s; }
+    .chapter-nav a:hover { color: var(--accent); }
+    footer { position: relative; z-index: 2; text-align: center; padding: 1.5rem 2rem 3rem; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.35em; color: var(--sepia); text-transform: uppercase; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.9s ease, transform 0.9s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+<canvas id="rain"></canvas>
+<div class="fog"></div>
+
+<nav class="topnav">
+  <a href="chapter3.html">← Chapter III</a>
+  <span class="nav-center">Veleslav</span>
+  <a href="chapter5.html">Chapter V →</a>
+</nav>
+
+<section class="hero">
+  <p class="hero-eyebrow">A Dark Romance Novel</p>
+  <h1 class="hero-title">The Line</h1>
+  <span class="hero-chapter-num">Chapter Four</span>
+  <p class="hero-subtitle">"The next time you see me, it won't be in a café. And the choice won't be yours."</p>
+  <div class="scroll-cue">Read</div>
+</section>
+
+<main class="chapter">
+  <header class="chapter-header reveal">
+    <span class="chapter-label">Chapter IV</span>
+    <h2 class="chapter-name">The Line</h2>
+  </header>
+  <div class="ornament reveal">✦ ✦ ✦</div>
+
+  <div class="prose">
+
+    <p class="reveal">The silence stretched longer than it should have. It wasn't empty. It was waiting.</p>
+
+    <p class="reveal">Lily felt it settle around her — not like pressure, but like expectation. As if something had already leaned forward, listening for what she would say next.</p>
+
+    <p class="reveal">She should have stood up. She knew that. But she didn't.</p>
+
+    <p class="reveal">The café hadn't changed. But something in her had.</p>
+
+    <p class="reveal">Zane watched her, his expression unreadable. He hadn't moved since offering her the choice. He was giving her a way out. A clear, simple path: turn, walk through the door, forget everything. And she wasn't taking it.</p>
+
+    <p class="reveal">Not because she felt brave. Not because she felt chosen. Because the not-knowing felt worse than the knowing might.</p>
+
+    <p class="reveal">It was a quiet, stubborn defiance. A trait she'd always carried but never named: she hated not understanding things. It was the reason she studied folklore, the reason she dug into myths about tricksters and deceivers. Ignorance was a poison. And she'd rather drink the truth, even if it burned.</p>
+
+    <p class="reveal">She didn't stand. She didn't walk away. Instead, she asked a question.</p>
+
+    <p class="reveal"><span class="dialogue">"Who didn't leave when they should have?"</span></p>
+
+    <p class="reveal">Zane's eyes narrowed, just slightly. A fractional shift. Not surprise. <em>Reassessment.</em></p>
+
+    <p class="reveal"><span class="dialogue">"That,"</span> he said, his voice a low murmur, <span class="dialogue">"wasn't the answer I expected."</span></p>
+
+    <p class="reveal">It was the first crack. The first moment he hadn't predicted her perfectly.</p>
+
+    <p class="reveal">He leaned back, but the distance between them didn't increase. It changed in quality. He was no longer just an observer. He was engaged.</p>
+
+    <p class="reveal"><span class="dialogue">"Alright,"</span> he said, almost to himself. Then, to her: <span class="dialogue">"You chose this."</span></p>
+
+    <p class="reveal">Not a threat. A recognition.</p>
+
+    <p class="reveal">He reached into the inner pocket of his coat and withdrew a single photograph. Not one of the ones she'd found. This one was newer. The paper different. He placed it on the table between them.</p>
+
+    <p class="reveal">It felt cold beneath her fingertips. Damp. <em>Wrong.</em></p>
+
+    <p class="reveal">Lily looked at it. For a split-second, her mind resisted — searching for something else to make of it. A coincidence. A mistake. A stranger's photograph taken at the wrong angle. The thought didn't hold. It couldn't.</p>
+
+    <p class="reveal">The street was hers. The frame captured it from above — from a window that shouldn't have mattered. In the center, blurred by rain and motion, a figure moved toward the building.</p>
+
+    <p class="reveal lone-line">Her.</p>
+
+    <p class="reveal">Carrying a suitcase. The date, scrawled in the corner, marked the day she arrived. A week ago. Earlier than it should have been possible.</p>
+
+    <p class="reveal">Her fingers stilled against the edge of the photograph.</p>
+
+    <p class="reveal"><span class="dialogue">"Taken isn't death,"</span> Lily said quietly, repeating the word as if testing its shape.</p>
+
+    <p class="reveal">Zane tilted his head.</p>
+
+    <p class="reveal"><span class="dialogue">"You're still thinking in terms of endings,"</span> he said. <span class="dialogue">"That's not what this is."</span></p>
+
+    <p class="reveal">A pause. Deliberate. Measured.</p>
+
+    <p class="reveal"><span class="dialogue">"Nothing ended for them."</span></p>
+
+    <p class="reveal">The words settled with weight. <span class="dialogue">"They were removed,"</span> he continued, his tone shifting — not explaining, but revealing. <span class="dialogue">"When curiosity outweighed caution."</span></p>
+
+    <p class="reveal">His gaze held hers.</p>
+
+    <p class="reveal"><span class="dialogue">"You were observed,"</span> he said. <span class="dialogue">"Patterns. Repetition. Preference."</span></p>
+
+    <p class="reveal">A beat.</p>
+
+    <p class="reveal"><span class="dialogue">"You're very consistent, Lily."</span></p>
+
+    <p class="reveal">The sound of the café receded into something distant and indistinct. The world narrowed to the photograph beneath her hand and the precision of his voice.</p>
+
+    <p class="reveal"><span class="dialogue">"Why?"</span> she asked. Steady. Thin. Drawn tight.</p>
+
+    <p class="reveal">Zane didn't answer.</p>
+
+    <p class="reveal"><span class="dialogue">"You think this is a story about me,"</span> he said instead. <span class="dialogue">"Or about him."</span></p>
+
+    <p class="reveal">A pause.</p>
+
+    <p class="reveal lone-line" style="font-family:'IM Fell English',serif; font-style:italic; font-size:1.1rem; color:var(--mist); letter-spacing:0.05em; font-weight:400;">The Collector.</p>
+
+    <p class="reveal">The name didn't echo. It settled.</p>
+
+    <p class="reveal"><span class="dialogue">"It's not,"</span> he continued. <span class="dialogue">"It's a story about choices."</span> His gaze didn't waver. <span class="dialogue">"And you just made one."</span></p>
+
+    <p class="reveal">He stood. The motion was slow. Final.</p>
+
+    <p class="reveal"><span class="dialogue">"The next time you see me,"</span> he said, <span class="dialogue">"it won't be in a café."</span></p>
+
+    <p class="reveal">A breath.</p>
+
+    <p class="reveal"><span class="dialogue">"And the choice won't be yours."</span></p>
+
+    <p class="reveal">He turned and walked toward the door. Lily didn't watch him leave. Her eyes remained fixed on the photograph — on the version of herself that had already stepped into something she hadn't understood.</p>
+
+    <p class="reveal">She didn't remember standing. Only that, at some point, she had crossed it.</p>
+
+    <p class="reveal lone-line">The line.</p>
+
+    <p class="reveal">The mystery was no longer abstract. It was real. It had her face in it. She was already part of it.</p>
+
+    <p class="reveal lone-line" style="font-family:'IM Fell English',serif; font-style:italic; font-size:1.2rem; color:rgba(240,235,224,0.65); letter-spacing:0.04em; font-weight:400;">And there was no path back.</p>
+
+  </div>
+  <div class="ornament reveal" style="margin-top:3rem;">✦</div>
+</main>
+
+<div class="chapter-nav">
+  <a href="chapter3.html">← Chapter III</a>
+  <a href="chapter5.html">Chapter V →</a>
+</div>
+<footer>&copy; 2026 &nbsp;·&nbsp; All Rights Reserved</footer>
+
+<script>
+  const canvas = document.getElementById('rain');
+  const ctx = canvas.getContext('2d');
+  let drops = [];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for (let i = 0; i < 130; i++) drops.push({ x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight, len: Math.random()*18+8, speed: Math.random()*2+1, opacity: Math.random()*0.4+0.08, width: Math.random()*0.6+0.2 });
+  (function drawRain() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    drops.forEach(d => { ctx.beginPath(); ctx.moveTo(d.x,d.y); ctx.lineTo(d.x-d.len*0.15,d.y+d.len); ctx.strokeStyle=`rgba(170,195,210,${d.opacity})`; ctx.lineWidth=d.width; ctx.stroke(); d.y+=d.speed; d.x-=d.speed*0.15; if(d.y>canvas.height){d.y=-d.len;d.x=Math.random()*canvas.width;} });
+    requestAnimationFrame(drawRain);
+  })();
+  const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} }); }, {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

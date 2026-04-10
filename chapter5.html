@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chapter Five — Inside the System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --parchment: #f5f0e8; --sepia: #8b6f47; --mist: #9aa8b2; --accent: #c9a96e; --deep: #0d1117; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background-color: var(--deep); color: var(--parchment); font-family: 'Cormorant Garamond', serif; font-weight: 300; min-height: 100vh; overflow-x: hidden; }
+    #rain { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.08; }
+    .fog { position: fixed; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(ellipse at 50% 50%, rgba(13,17,23,0.3) 0%, rgba(5,5,8,0.7) 100%); }
+    nav.topnav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5rem; background: rgba(13,17,23,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(201,169,110,0.1); font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase; }
+    nav.topnav a { color: #8b6f47; text-decoration: none; transition: color 0.3s; }
+    nav.topnav a:hover { color: #c9a96e; }
+    nav.topnav .nav-center { color: #9aa8b2; font-size: 0.55rem; letter-spacing: 0.3em; }
+    .hero { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6rem 2rem 4rem; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(201,169,110,0.025) 39px, rgba(201,169,110,0.025) 40px); pointer-events: none; }
+    /* darker, more claustrophobic vignette for ch5 */
+    .hero::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 20%, rgba(5,5,8,0.75) 100%); pointer-events: none; }
+    .hero-eyebrow { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.5em; color: var(--mist); text-transform: uppercase; margin-bottom: 2rem; opacity: 0; animation: fadeUp 1.2s ease forwards 0.3s; position: relative; z-index: 1; }
+    .hero-title { font-family: 'Cinzel', serif; font-size: clamp(2rem, 7vw, 6rem); font-weight: 600; line-height: 1; color: var(--parchment); margin-bottom: 0.5rem; opacity: 0; animation: fadeUp 1.4s ease forwards 0.5s; position: relative; z-index: 1; }
+    .hero-chapter-num { font-family: 'Cinzel', serif; font-size: clamp(0.7rem, 1.8vw, 0.9rem); color: var(--accent); letter-spacing: 0.45em; text-transform: uppercase; display: block; margin-bottom: 2rem; opacity: 0; animation: fadeUp 1.4s ease forwards 0.65s; position: relative; z-index: 1; }
+    .hero-subtitle { font-family: 'IM Fell English', serif; font-style: italic; font-size: clamp(1rem, 2.2vw, 1.28rem); color: var(--mist); max-width: 42ch; line-height: 1.75; margin-bottom: 3rem; opacity: 0; animation: fadeUp 1.4s ease forwards 0.85s; position: relative; z-index: 1; }
+    .scroll-cue { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.4em; color: var(--sepia); text-transform: uppercase; opacity: 0; animation: fadeUp 1s ease forwards 1.4s, pulse 2.5s ease-in-out infinite 2.4s; display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1; }
+    .scroll-cue::before, .scroll-cue::after { content: ''; display: block; width: 40px; height: 1px; background: var(--sepia); }
+    .chapter { position: relative; z-index: 2; max-width: 680px; margin: 0 auto; padding: 0 2rem 8rem; }
+    .chapter-header { text-align: center; padding: 5rem 0 3rem; border-top: 1px solid rgba(201,169,110,0.2); }
+    .chapter-label { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.5em; color: var(--sepia); text-transform: uppercase; display: block; margin-bottom: 1rem; }
+    .chapter-name { font-family: 'Cinzel', serif; font-size: clamp(1.4rem, 3.5vw, 2.1rem); font-weight: 400; color: var(--accent); letter-spacing: 0.05em; }
+    .ornament { text-align: center; color: var(--accent); font-size: 1.1rem; opacity: 0.55; margin: 2.5rem 0; letter-spacing: 0.5em; }
+    .prose p { font-size: clamp(1.05rem, 2vw, 1.2rem); line-height: 1.95; color: rgba(245,240,232,0.88); margin-bottom: 1.6em; text-align: justify; hyphens: auto; }
+    .prose p:first-child::first-letter { font-family: 'Cinzel', serif; font-size: 4.5rem; font-weight: 600; color: var(--accent); float: left; line-height: 0.8; margin: 0.05em 0.12em 0 0; padding: 0.05em 0.08em; border: 1px solid rgba(201,169,110,0.4); }
+    .prose em { font-family: 'IM Fell English', serif; color: var(--parchment); }
+    .dialogue { color: rgba(245,240,232,0.97); font-style: italic; }
+    .lone-line { text-align: center; font-family: 'Cinzel', serif; font-size: clamp(1rem, 2.5vw, 1.3rem); font-weight: 600; letter-spacing: 0.2em; color: var(--accent); margin: 2.5rem 0 !important; }
+    .chapter-nav { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; max-width: 680px; margin: 0 auto; padding: 2rem 2rem 5rem; border-top: 1px solid rgba(201,169,110,0.15); }
+    .chapter-nav a { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--sepia); text-decoration: none; transition: color 0.3s; }
+    .chapter-nav a:hover { color: var(--accent); }
+    footer { position: relative; z-index: 2; text-align: center; padding: 1.5rem 2rem 3rem; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.35em; color: var(--sepia); text-transform: uppercase; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.9s ease, transform 0.9s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+<canvas id="rain"></canvas>
+<div class="fog"></div>
+
+<nav class="topnav">
+  <a href="chapter4.html">← Chapter IV</a>
+  <span class="nav-center">Veleslav</span>
+  <a href="chapter6.html">Chapter VI →</a>
+</nav>
+
+<section class="hero">
+  <p class="hero-eyebrow">A Dark Romance Novel</p>
+  <h1 class="hero-title">Inside the System</h1>
+  <span class="hero-chapter-num">Chapter Five</span>
+  <p class="hero-subtitle">"The world was no longer passive. It was aware."</p>
+  <div class="scroll-cue">Read</div>
+</section>
+
+<main class="chapter">
+  <header class="chapter-header reveal">
+    <span class="chapter-label">Chapter V</span>
+    <h2 class="chapter-name">Inside the System</h2>
+  </header>
+  <div class="ornament reveal">✦ ✦ ✦</div>
+
+  <div class="prose">
+
+    <p class="reveal">Lily walked home. She walked deliberately, cataloguing every shift in the streetlights, every echo of her own footsteps. She wasn't panicking. She wasn't confused. She was rearranging reality inside her mind.</p>
+
+    <p class="reveal">She had made a choice. She was measuring its consequences. The air had texture now. Each parked car, each shadowed doorway felt like part of a sequence she had only just learned how to see.</p>
+
+    <p class="reveal">And underneath that, a quiet, cold realization: something had already shifted. The world was no longer passive. It was <em>aware</em>.</p>
+
+    <p class="reveal lone-line" style="font-family:'IM Fell English',serif; font-style:italic; font-size:1.05rem; color:var(--mist); letter-spacing:0.05em; font-weight:400;">Patterns. Repetition. Preference.</p>
+
+    <p class="reveal">Zane's voice returned — not in memory, but in echo. A proof of truth embedded in every brick, every dark window.</p>
+
+    <p class="reveal">She arrived at her apartment building. The familiar façade looked at her wrong. The door felt heavier than it should have. The lock clicked, clean and final. She climbed the stairs. Her footsteps sounded too defined. Too certain.</p>
+
+    <p class="reveal">She opened her door. The apartment was exactly as she'd left it. And yet — <em>misaligned</em>.</p>
+
+    <p class="reveal">The silence wasn't empty. It was waiting. The lamp she'd left on was now off. The explanation came instantly — the bulb, the wiring, something small and explainable — but it didn't hold. It couldn't.</p>
+
+    <p class="reveal">The small, hidden panel beside the radiator was open. Not cracked. Not disturbed.</p>
+
+    <p class="reveal lone-line">Open.</p>
+
+    <p class="reveal">A gap. An invitation. She hadn't touched it since yesterday.</p>
+
+    <p class="reveal">She moved toward it slowly, each step placed with intent, her heartbeat steady and stubborn against her ribs. She hadn't noticed how close he'd been in the café. Not until he wasn't. Not until she was alone in a space that no longer felt like hers.</p>
+
+    <p class="reveal">She knelt before the panel. Inside — nothing. Empty. Except — on the bare wooden floor of the cavity, a single photograph. New. Cold. Crisp. Waiting.</p>
+
+    <p class="reveal">She picked it up.</p>
+
+    <p class="reveal">Her apartment doorway. From inside the hall. The angle shouldn't exist. She hadn't left anything there. No device. No lens. Nothing that could account for it. The photograph had been taken <em>tonight</em>.</p>
+
+    <p class="reveal">Her door was open. Light from her apartment spilling outward. And someone — inside.</p>
+
+    <p class="reveal">She didn't remember that.</p>
+
+    <p class="reveal">A chill moved through her, slow and deliberate, settling into her spine rather than striking it. Not shock. <em>Recognition.</em></p>
+
+    <p class="reveal">The Collector wasn't a presence. Not in the way she understood presence. Not a man. Not a watcher.</p>
+
+    <p class="reveal lone-line" style="font-family:'IM Fell English',serif; font-style:italic; font-size:1.1rem; color:var(--mist); letter-spacing:0.05em; font-weight:400;">A system.</p>
+
+    <p class="reveal">Something that arranged. Something that moved objects, documented events, and anticipated her before she acted. The world was aware of her.</p>
+
+    <p class="reveal">She stood, turning slowly, her gaze passing over everything. Her shelves. Her desk. Her bed. Nothing had changed. Everything had.</p>
+
+    <p class="reveal">On the bedside table, the book she'd been reading — a dense academic volume on Slavic folklore — lay open. Not randomly. Deliberately. She hadn't touched it since yesterday. The page it rested on described the <em>nav</em> — spirits that returned, not as ghosts, but as corrections. Forces that did not haunt. They adjusted. Left marks. Rebalanced what had shifted.</p>
+
+    <p class="reveal">It wasn't a message. Not exactly. But it wasn't nothing.</p>
+
+    <p class="reveal">Her fingers tightened around the photograph. A sound behind her. Not inside the apartment. The hallway. A click. Not a door closing. A lock engaging.</p>
+
+    <p class="reveal">She moved to her door, her hand closing around the handle. It didn't move. Locked. Her keys were still in her coat pocket. She hadn't turned the lock. The sound hadn't been her door. It had been something else.</p>
+
+    <p class="reveal">She turned back to the panel. Stepped closer. The photograph in her hand felt damp now. Wrong. She looked at it again — and paused.</p>
+
+    <p class="reveal">Something had shifted. Not in the room. In the image. The angle was the same. The doorway. The light. But the frame was tighter. Closer. As if whoever had taken it had stepped forward.</p>
+
+    <p class="reveal">A barely audible sound behind her. Metal. A hinge. Soft. Precise.</p>
+
+    <p class="reveal">She didn't turn. Didn't look. Didn't break focus. She listened.</p>
+
+    <p class="reveal">Zane had watched her. This — was something else. This didn't watch. It arranged. The photograph wasn't just proof she was being observed. It was proof that something was already ahead of her. That multiple outcomes existed — and this one had been selected.</p>
+
+    <p class="reveal lone-line" style="font-family:'IM Fell English',serif; font-style:italic; font-size:1.05rem; color:var(--mist); letter-spacing:0.05em; font-weight:400;">For her.</p>
+
+    <p class="reveal">She sat on the edge of her bed, the photograph still in her hand, her eyes fixed on the open panel. Watching it. As if it might move. As if it might answer.</p>
+
+    <p class="reveal">Nothing in the room belonged to her anymore. Not the objects. Not the space. Not even the sequence of events.</p>
+
+    <p class="reveal">Zane's final words returned, stripped of any illusion of choice: <em>The next time you see me, it won't be in a café. And the choice won't be yours.</em></p>
+
+    <p class="reveal">She wasn't waiting for what would happen next. She was <em>listening</em> for it. And beneath that — something else settled into place. Not fear. Not confusion.</p>
+
+    <p class="reveal">Something sharper. Quieter.</p>
+
+    <p class="reveal lone-line" style="font-family:'IM Fell English',serif; font-style:italic; font-size:1.1rem; color:var(--mist); letter-spacing:0.05em; font-weight:400;">A pull.</p>
+
+    <p class="reveal">The same force that had made her stay. The same force that had made her look. Danger and understanding had become the same thing. And she couldn't tell anymore which one she wanted.</p>
+
+    <p class="reveal">The realization didn't frighten her. It steadied her.</p>
+
+    <p class="reveal lone-line" style="font-family:'IM Fell English',serif; font-style:italic; font-size:1.2rem; color:rgba(240,235,224,0.65); letter-spacing:0.04em; font-weight:400;">It had already started.</p>
+
+  </div>
+  <div class="ornament reveal" style="margin-top:3rem;">✦</div>
+</main>
+
+<div class="chapter-nav">
+  <a href="chapter4.html">← Chapter IV</a>
+  <a href="chapter6.html">Chapter VI →</a>
+</div>
+<footer>&copy; 2026 &nbsp;·&nbsp; All Rights Reserved</footer>
+
+<script>
+  const canvas = document.getElementById('rain');
+  const ctx = canvas.getContext('2d');
+  let drops = [];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for (let i = 0; i < 90; i++) drops.push({ x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight, len: Math.random()*14+6, speed: Math.random()*1.5+0.6, opacity: Math.random()*0.3+0.05, width: Math.random()*0.5+0.15 });
+  (function drawRain() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    drops.forEach(d => { ctx.beginPath(); ctx.moveTo(d.x,d.y); ctx.lineTo(d.x-d.len*0.1,d.y+d.len); ctx.strokeStyle=`rgba(170,195,210,${d.opacity})`; ctx.lineWidth=d.width; ctx.stroke(); d.y+=d.speed; d.x-=d.speed*0.1; if(d.y>canvas.height){d.y=-d.len;d.x=Math.random()*canvas.width;} });
+    requestAnimationFrame(drawRain);
+  })();
+  const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} }); }, {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
