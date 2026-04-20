@@ -27,23 +27,6 @@
       overflow-x: hidden;
     }
 
-    /* ── Fixed Top Nav ── */
-    nav.topnav {
-      position: fixed; top: 0; left: 0; right: 0;
-      z-index: 20;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 2.5rem;
-      background: rgba(13,17,23,0.92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid rgba(201,169,110,0.1);
-      font-family: 'Cinzel', serif;
-      font-size: 0.6rem; letter-spacing: 0.4em; text-transform: uppercase;
-    }
-    nav.topnav a { color: #8b6f47; text-decoration: none; transition: color 0.3s; }
-    nav.topnav a:hover { color: #c9a96e; }
-    nav.topnav .nav-center { color: #9aa8b2; font-size: 0.55rem; letter-spacing: 0.3em; }
-    nav.topnav .nav-ghost { opacity: 0; pointer-events: none; }
-
     #rain {
       position: fixed; inset: 0;
       pointer-events: none; z-index: 0; opacity: 0.10;
@@ -265,20 +248,21 @@
     }
     .reveal.visible { opacity: 1; transform: translateY(0); }
   </style>
+  <link rel="stylesheet" href="word-explainer.css"/>
 </head>
 <body>
 
 <canvas id="rain"></canvas>
 <div class="fog"></div>
 
-<nav class="topnav">
+<nav>
   <a href="chapter2.html">← Chapter II</a>
-  <span class="nav-center">Veleslav</span>
-  <a href="chapter4.html">Chapter IV →</a>
+  <span class="nav-title">Veleslav</span>
+  <a href="index.html">Home</a>
 </nav>
 
 <!-- Hero -->
-<section class="hero" style="padding-top:6rem;">
+<section class="hero">
   <p class="hero-eyebrow">A Dark Romance Novel</p>
   <h1 class="hero-title">The Collector's Invitation</h1>
   <span class="hero-chapter-num">Chapter Three</span>
@@ -521,7 +505,7 @@
 
 <div class="chapter-nav">
   <a href="chapter2.html">← Chapter II</a>
-  <a href="chapter4.html">Chapter IV →</a>
+  <span style="font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.3em; color:rgba(139,111,71,0.4); text-transform:uppercase;">End of Chapter III</span>
 </div>
 
 <footer>&copy; 2026 &nbsp;·&nbsp; All Rights Reserved</footer>
@@ -566,5 +550,36 @@
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
+
+<!-- ── Word Explainer Widget ── -->
+<div id="word-explainer">
+  <button id="we-toggle" aria-label="Open word explainer">
+    <span class="we-rune">✦</span>
+    Lexicon
+  </button>
+  <div id="we-panel" class="we-hidden" role="dialog" aria-label="Word Explainer">
+    <div class="we-header">
+      <span class="we-title">Word Explainer</span>
+      <button class="we-close" id="we-close" aria-label="Close">✕</button>
+    </div>
+    <div class="we-input-row">
+      <input
+        id="we-input"
+        type="text"
+        placeholder="A word you don't recognize?"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        maxlength="60"
+        aria-label="Enter a word"
+      />
+      <button id="we-btn" aria-label="Explain word">Explain</button>
+    </div>
+    <div id="we-output" class="we-empty" aria-live="polite">Enter a word above…</div>
+    <div class="we-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+  </div>
+</div>
+<script src="word-explainer.js"></script>
+
 </body>
 </html>
