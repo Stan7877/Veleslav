@@ -46,6 +46,7 @@
     .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.9s ease, transform 0.9s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
   </style>
+  <link rel="stylesheet" href="word-explainer.css"/>
 </head>
 <body>
 <canvas id="rain"></canvas>
@@ -189,5 +190,36 @@
   const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} }); }, {threshold:0.12});
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
+
+<!-- ── Word Explainer Widget ── -->
+<div id="word-explainer">
+  <button id="we-toggle" aria-label="Open word explainer">
+    <span class="we-rune">✦</span>
+    Lexicon
+  </button>
+  <div id="we-panel" class="we-hidden" role="dialog" aria-label="Word Explainer">
+    <div class="we-header">
+      <span class="we-title">Word Explainer</span>
+      <button class="we-close" id="we-close" aria-label="Close">✕</button>
+    </div>
+    <div class="we-input-row">
+      <input
+        id="we-input"
+        type="text"
+        placeholder="A word you don't recognize?"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+        maxlength="60"
+        aria-label="Enter a word"
+      />
+      <button id="we-btn" aria-label="Explain word">Explain</button>
+    </div>
+    <div id="we-output" class="we-empty" aria-live="polite">Enter a word above…</div>
+    <div class="we-ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+  </div>
+</div>
+<script src="word-explainer.js"></script>
+
 </body>
 </html>
